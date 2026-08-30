@@ -71,7 +71,6 @@ Final Answer: your answer
 """
 
 def run_agent(question):
-
     messages = [
         {
             "role": "system",
@@ -84,67 +83,41 @@ def run_agent(question):
     ]
 
     for step in range(5):
-
         print("\n------------------")
         print("STEP", step + 1)
         print("------------------")
 
-        response = client.chat.completions.create(
-            model="openai/gpt-oss-120b",
-            messages=messages,
-            temperature=0
-        )
-
+        response = client.chat.completions.create(model="openai/gpt-oss-120b",messages=messages,temperature=0)
         answer = response.choices[0].message.content
-
         print(answer)
 
         # Agent has finished
         if "Final Answer:" in answer:
             break
 
-
         # Find the Action
-        match = re.search(
-            r"Action:\s*(\w+)\((.*?)\)",
-            answer
-        )
+        match = re.search(r"Action:\s*(\w+)\((.*?)\)",answer)
 
 
         if match:
-
             tool_name = match.group(1)
-
             tool_input = match.group(2)
-
             tool_input = tool_input.strip()
-
             tool_input = tool_input.strip('"')
-
 
             # Run the tool
             if tool_name in tools:
-
                 tool = tools[tool_name]
-
                 observation = tool(tool_input)
-
             else:
-
                 observation = "Tool not found"
 
 
-            print(
-                "Observation:",
-                observation
-            )
+            print("Observation:",observation)
 
 
             # Add LLM response to memory
-            messages.append({
-                "role": "assistant",
-                "content": answer
-            })
+            messages.append({"role": "assistant","content": answer})
 
 
             # Give tool result back to LLM
